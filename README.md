@@ -196,3 +196,45 @@ Add:
 - Generate embeddings
 - Index chunks in Qdrant
 
+
+---
+
+# Step 31: Update README Progress
+
+Add:
+
+```md
+## Current Progress
+
+### Completed
+
+- Project foundation
+- FastAPI skeleton
+- Database foundation
+- SQLAlchemy models
+- Alembic migrations
+- Document upload API
+- Local/S3 storage abstraction
+- File validation
+- Checksum generation
+- Audit logging
+- PDF text extraction
+- Extracted text persistence
+- Document status transitions
+- Workflow tracking
+- Page-aware chunking
+- Mock/OpenAI embedding abstraction
+- Qdrant vector indexing
+- Document chunks API
+
+### In Progress
+
+- RAG retrieval and Q&A
+
+### Next
+
+- Semantic retrieval from Qdrant
+- Chat query API
+- RAG answer generation
+- Citations
+- Guardrails
