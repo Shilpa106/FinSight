@@ -92,6 +92,42 @@ The MVP will support:
 9. Evaluation agent scores the response
 10. Results are stored for audit and observability
 
+---
+
+# Step 26: Update README MVP Progress
+
+Add this section to your `README.md`:
+
+```md
+## Current Progress
+
+### Completed
+
+- Project foundation
+- FastAPI skeleton
+- Database foundation
+- SQLAlchemy models
+- Alembic migrations
+- Seed data
+- Health checks
+- Document upload API
+- Local/S3-compatible storage abstraction
+- File validation
+- Checksum generation
+- Document metadata persistence
+- Audit logging
+
+### In Progress
+
+- PDF text extraction
+
+### Next
+
+- Document processing pipeline
+- Text extraction service
+- Page-level PDF extraction
+- Document status transition from uploaded to text_extracted
+
 ## Long-Term Scope
 
 Future phases include:
