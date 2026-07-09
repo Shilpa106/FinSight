@@ -70,6 +70,14 @@ class Document(Base):
 
     organization = relationship("Organization", back_populates="documents")
     uploaded_by_user = relationship("User", back_populates="documents")
+
+    text = relationship(
+    "DocumentText",
+    back_populates="document",
+    uselist=False,
+    cascade="all, delete-orphan",
+    )
+
     chunks = relationship(
         "DocumentChunk",
         back_populates="document",
