@@ -156,3 +156,43 @@ Agent Layer
 Workflow Layer
   ↓
 Database / Vector DB / Storage / Queue
+
+
+
+---
+
+# Step 22: Update README Progress
+
+Add:
+
+```md
+## Current Progress
+
+### Completed
+
+- Project foundation
+- FastAPI skeleton
+- Database foundation
+- SQLAlchemy models
+- Alembic migrations
+- Document upload API
+- Local/S3 storage abstraction
+- File validation
+- Checksum generation
+- Audit logging
+- PDF text extraction
+- Document processing workflow tracking
+- Extracted text persistence
+- Document status transitions
+
+### In Progress
+
+- Chunking and embeddings
+
+### Next
+
+- Chunk extracted text
+- Store document chunks
+- Generate embeddings
+- Index chunks in Qdrant
+
