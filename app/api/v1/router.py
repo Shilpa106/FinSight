@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.api.v1.endpoints.document_indexing import router as document_indexing_router
 from app.api.v1.endpoints.document_processing import router as document_processing_router
 from app.api.v1.endpoints.documents import router as documents_router
 from app.api.v1.endpoints.health import router as health_router
@@ -12,4 +13,9 @@ router.include_router(
     document_processing_router,
     prefix="/documents",
     tags=["Document Processing"],
+)
+router.include_router(
+    document_indexing_router,
+    prefix="/documents",
+    tags=["Document Indexing"],
 )
