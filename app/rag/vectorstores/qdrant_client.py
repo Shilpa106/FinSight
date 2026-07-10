@@ -72,3 +72,62 @@ class QdrantVectorStoreClient(VectorStoreClient):
                 ]
             ),
         )
+
+    def search(     
+        self,
+        query_vector: list[float],
+        organization_id: str,
+        document_id: str,
+        top_k: int,
+        min_score: float,
+    ) -> list[dict]:
+        self.ensure_collection()
+
+        search_filter = Filter(
+            must=[
+                FieldCondition(
+                    key="organization_id",
+                    match=MatchValue(value=organization_id),
+                ),
+                FieldCondition(
+                    key="document_id",
+                    match=MatchValue(value=document_id),
+                ),
+            ]
+        )
+
+        # results = self.client.search(
+        #     collection_name=self.collection_name,
+        #     query_vector=query_vector,
+        #     query_filter=search_filter,
+        #     limit=top_k,
+        #     score_threshold=min_score,
+        #     with_payload=True,
+        # )
+
+        response = self.client.query_points(
+            collection_name=self.collection_name,
+            query=query_vector,
+            query_filter=search_filter,
+            limit=top_k,
+            # score_threshold=min_score,
+            with_payload=True,
+        )
+
+        results = response.points
+
+        output: list[dict] = []
+
+        for result in results:
+            payload = result.payload or {}
+
+            output.append(
+                {
+                    "id": str(result.id),
+                    "score": result.score,
+                    "payload": payload,
+                }
+            )
+
+        return output
+    

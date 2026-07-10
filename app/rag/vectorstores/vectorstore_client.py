@@ -19,3 +19,14 @@ class VectorStoreClient(ABC):
         document_id: str,
     ) -> None:
         pass
+
+    @abstractmethod
+    def search(
+        self,
+        query_vector: list[float],
+        organization_id: str,
+        document_id: str,
+        top_k: int,
+        min_score: float,
+    ) -> list[dict]:
+        pass
