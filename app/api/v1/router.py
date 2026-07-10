@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.api.v1.endpoints.chat import router as chat_router
 from app.api.v1.endpoints.document_indexing import router as document_indexing_router
 from app.api.v1.endpoints.document_processing import router as document_processing_router
 from app.api.v1.endpoints.documents import router as documents_router
@@ -19,3 +20,4 @@ router.include_router(
     prefix="/documents",
     tags=["Document Indexing"],
 )
+router.include_router(chat_router, prefix="/chat", tags=["Chat"])
