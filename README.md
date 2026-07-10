@@ -238,3 +238,44 @@ Add:
 - RAG answer generation
 - Citations
 - Guardrails
+
+
+
+---
+
+# Step 31: Update README Progress
+
+Add:
+
+```md
+## Current Progress
+
+### Completed
+
+- Project foundation
+- Database foundation
+- Document upload and storage
+- PDF text extraction
+- Extracted text persistence
+- Page-aware chunking
+- Embedding generation
+- Qdrant vector indexing
+- RAG retrieval
+- Chat query API
+- LLM answer generation
+- Citations
+- Chat history
+- LLM trace logging
+- RAG workflow tracking
+
+### In Progress
+
+- Guardrails and hallucination checks
+
+### Next
+
+- Citation validation
+- Groundedness checks
+- No investment advice guardrail
+- Prompt injection detection
+- RAG evaluation metrics
