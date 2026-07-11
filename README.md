@@ -366,3 +366,30 @@ Add to completed progress:
 - Background indexing
 - Retry handling
 - Scheduled evaluation runs
+
+
+---
+
+# Step 30: README Update
+
+Add to completed progress:
+
+```md
+### Completed
+
+- Celery app setup
+- Redis broker/backend configuration
+- Async text extraction task
+- Async indexing task
+- Async full document pipeline task
+- Async evaluation task
+- Task status API
+- Retry handling
+- Windows local Celery worker support
+
+### Next
+
+- Notifications
+- Email/Slack/webhook integration
+- Processing completion alerts
+- Review queue notifications
