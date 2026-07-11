@@ -18,6 +18,14 @@ class DocumentChunkRepository(BaseRepository[DocumentChunk]):
             .all()
         )
 
+    def delete_by_document(self, document_id: UUID) -> None:
+        (
+            self.db.query(DocumentChunk)
+            .filter(DocumentChunk.document_id == document_id)
+            .delete()
+        )
+        self.db.flush()
+
     def bulk_create(self, chunks: list[DocumentChunk]) -> list[DocumentChunk]:
         self.db.add_all(chunks)
         self.db.flush()
@@ -26,3 +34,21 @@ class DocumentChunkRepository(BaseRepository[DocumentChunk]):
             self.db.refresh(chunk)
 
         return chunks
+
+    def update_vector_id(
+        self,
+        chunk_id: UUID,
+        vector_id: str,
+    ) -> DocumentChunk | None:
+        chunk = self.get_by_id(chunk_id)
+
+        if chunk is None:
+            return None
+
+        chunk.vector_id = vector_id
+        self.db.flush()
+        self.db.refresh(chunk)
+
+        return chunk
+    
+    

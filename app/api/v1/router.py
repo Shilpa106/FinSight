@@ -5,6 +5,7 @@ from app.api.v1.endpoints.document_indexing import router as document_indexing_r
 from app.api.v1.endpoints.document_processing import router as document_processing_router
 from app.api.v1.endpoints.documents import router as documents_router
 from app.api.v1.endpoints.health import router as health_router
+from app.api.v1.endpoints.evaluations import router as evaluations_router
 
 router = APIRouter()
 
@@ -21,3 +22,9 @@ router.include_router(
     tags=["Document Indexing"],
 )
 router.include_router(chat_router, prefix="/chat", tags=["Chat"])
+
+router.include_router(
+    evaluations_router,
+    prefix="/evaluations",
+    tags=["Evaluations"],
+)

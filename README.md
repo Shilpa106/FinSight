@@ -313,3 +313,30 @@ Add to progress:
 - Guardrail evaluation
 - Regression datasets
 - Quality dashboards
+
+
+---
+
+# Step 22: README Update
+
+Add to completed progress:
+
+```md
+### Completed
+
+- RAG evaluation dataset format
+- Evaluation runner
+- Retrieval metrics
+- Answer keyword metrics
+- Citation metrics
+- Guardrail metrics
+- Evaluation persistence
+- Evaluation API
+- Markdown evaluation reports
+
+### Next
+
+- Human review workflow
+- Low-confidence answer routing
+- Review queue
+- Reviewer decisions
