@@ -279,3 +279,37 @@ Add:
 - No investment advice guardrail
 - Prompt injection detection
 - RAG evaluation metrics
+
+
+---
+
+# Step 18: README Update
+
+Add to progress:
+
+```md
+### Completed
+
+- RAG retrieval and Q&A
+- Chat session persistence
+- Citation generation
+- LLM trace logging
+- Input guardrails
+- Prompt injection detection
+- Citation validation
+- Groundedness checks
+- Investment advice checks
+- PII checks
+- Guardrail audit logging
+
+### In Progress
+
+- Evaluation and quality metrics
+
+### Next
+
+- RAG evaluation
+- Extraction evaluation
+- Guardrail evaluation
+- Regression datasets
+- Quality dashboards
