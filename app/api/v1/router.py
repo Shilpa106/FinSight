@@ -7,6 +7,7 @@ from app.api.v1.endpoints.documents import router as documents_router
 from app.api.v1.endpoints.health import router as health_router
 from app.api.v1.endpoints.evaluations import router as evaluations_router
 from app.api.v1.endpoints.reviews import router as reviews_router
+from app.api.v1.endpoints.tasks import router as tasks_router
 
 router = APIRouter()
 
@@ -34,4 +35,10 @@ router.include_router(
     reviews_router,
     prefix="/reviews",
     tags=["Human Reviews"],
+)
+
+router.include_router(
+    tasks_router,
+    prefix="/tasks",
+    tags=["Tasks"],
 )
