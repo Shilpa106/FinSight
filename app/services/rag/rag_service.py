@@ -24,7 +24,7 @@ from app.services.rag.answer_generation_service import AnswerGenerationService
 from app.services.rag.retrieval_service import RetrievalService
 from app.services.guardrails.input_guardrail_service import InputGuardrailService
 from app.services.guardrails.output_guardrail_service import OutputGuardrailService
-
+from app.services.reviews.reviews_routing_service import ReviewRoutingService
 
 class RAGService:
     def __init__(
@@ -51,7 +51,7 @@ class RAGService:
         self.audit_service = AuditService(db)
         self.input_guardrail_service = InputGuardrailService()
         self.output_guardrail_service = OutputGuardrailService()
-
+        self.review_routing_service = ReviewRoutingService(db)
     def answer_question(
         self,
         organization_id: UUID,
@@ -82,6 +82,7 @@ class RAGService:
         input_guardrail_decision = self.input_guardrail_service.validate_question(question)
 
         if not input_guardrail_decision.allowed:
+            guardrail_checks = [check.model_dump() for check in input_guardrail_decision.checks]
             self.audit_service.log_event(
                 organization_id=organization_id,
                 user_id=user_id,
@@ -96,6 +97,17 @@ class RAGService:
                         for check in input_guardrail_decision.checks
                     ],
                 },
+            )
+            review_item = self.review_routing_service.route_rag_result_if_needed(
+                organization_id=organization_id,
+                document_id=document_id,
+                question=question,
+                answer=input_guardrail_decision.safe_response,
+                guardrail_action=input_guardrail_decision.action,
+                guardrail_reason=input_guardrail_decision.reason,
+                guardrail_checks=guardrail_checks,
+                citations=[],
+                retrieved_chunk_count=0,
             )
 
             return {
@@ -113,6 +125,8 @@ class RAGService:
                     check.model_dump()
                     for check in input_guardrail_decision.checks
                 ],
+                "review_required": review_item is not None,
+                "review_id": review_item.id if review_item else None,
             }
 
         workflow_run = self._create_workflow_run(
@@ -217,7 +231,7 @@ class RAGService:
                 )
                 final_citations = []
 
-            self.chat_service.add_message(
+            assistant_message = self.chat_service.add_message(
                 session_id=session.id,
                 role="assistant",
                 content=final_answer,
@@ -234,6 +248,24 @@ class RAGService:
                         for check in output_guardrail_decision.checks
                     ],
                 },
+            )
+
+            review_item = self.review_routing_service.route_rag_result_if_needed(
+                organization_id=organization_id,
+                document_id=document_id,
+                session_id=session.id,
+                assistant_message_id=assistant_message.id,
+                workflow_run_id=workflow_run.id,
+                question=question,
+                answer=final_answer,
+                citations=final_citations,
+                guardrail_action=output_guardrail_decision.action,
+                guardrail_reason=output_guardrail_decision.reason,
+                guardrail_checks=[
+                    check.model_dump()
+                    for check in output_guardrail_decision.checks
+                ],
+                retrieved_chunk_count=retrieval_result.total,
             )
 
             self.llm_trace_service.record_trace(
@@ -298,6 +330,8 @@ class RAGService:
                     check.model_dump()
                     for check in output_guardrail_decision.checks
                 ],
+                "review_required": review_item is not None,
+                "review_id": review_item.id if review_item else None,
             }
 
         except Exception as error:

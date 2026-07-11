@@ -33,6 +33,8 @@ class ChatQueryResponse(BaseModel):
     guardrail_action: str | None = None
     guardrail_reason: str | None = None
     guardrail_checks: list[dict] | None = None
+    review_required: bool = False
+    review_id: UUID | None = None
 
 
 class ChatMessageResponse(BaseModel):
