@@ -30,6 +30,9 @@ class ChatQueryResponse(BaseModel):
     retrieved_chunk_count: int
     model_provider: str
     model_name: str
+    guardrail_action: str | None = None
+    guardrail_reason: str | None = None
+    guardrail_checks: list[dict] | None = None
 
 
 class ChatMessageResponse(BaseModel):

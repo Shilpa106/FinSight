@@ -22,6 +22,8 @@ from app.services.chat.chat_service import ChatService
 from app.services.observability.llm_trace_service import LLMTraceService
 from app.services.rag.answer_generation_service import AnswerGenerationService
 from app.services.rag.retrieval_service import RetrievalService
+from app.services.guardrails.input_guardrail_service import InputGuardrailService
+from app.services.guardrails.output_guardrail_service import OutputGuardrailService
 
 
 class RAGService:
@@ -47,6 +49,8 @@ class RAGService:
         self.citation_builder = CitationBuilder()
         self.llm_trace_service = LLMTraceService(db)
         self.audit_service = AuditService(db)
+        self.input_guardrail_service = InputGuardrailService()
+        self.output_guardrail_service = OutputGuardrailService()
 
     def answer_question(
         self,
@@ -56,6 +60,9 @@ class RAGService:
         question: str,
         session_id: UUID | None = None,
     ) -> dict:
+        from uuid import uuid4
+        if session_id is None:
+            session_id = uuid4()
         document = self.document_repository.get_by_id(document_id)
 
         if document is None:
@@ -71,6 +78,42 @@ class RAGService:
             raise ValueError(
                 f"Document must be indexed before Q&A. Current status: {document.status}"
             )
+        
+        input_guardrail_decision = self.input_guardrail_service.validate_question(question)
+
+        if not input_guardrail_decision.allowed:
+            self.audit_service.log_event(
+                organization_id=organization_id,
+                user_id=user_id,
+                action="guardrail.input_blocked",
+                resource_type="document",
+                resource_id=str(document_id),
+                metadata={
+                    "reason": input_guardrail_decision.reason,
+                    "action": input_guardrail_decision.action,
+                    "checks": [
+                        check.model_dump()
+                        for check in input_guardrail_decision.checks
+                    ],
+                },
+            )
+
+            return {
+                "session_id": session_id,
+                "document_id": document_id,
+                "question": question,
+                "answer": input_guardrail_decision.safe_response,
+                "citations": [],
+                "retrieved_chunk_count": 0,
+                "model_provider": "guardrail",
+                "model_name": "input_guardrail",
+                "guardrail_action": input_guardrail_decision.action,
+                "guardrail_reason": input_guardrail_decision.reason,
+                "guardrail_checks": [
+                    check.model_dump()
+                    for check in input_guardrail_decision.checks
+                ],
+            }
 
         workflow_run = self._create_workflow_run(
             organization_id=organization_id,
@@ -150,16 +193,46 @@ class RAGService:
                 ),
             )
 
+            guardrail_step = self._create_workflow_step(
+            workflow_run_id=workflow_run.id,
+            step_name="validate_answer_guardrails",
+            step_order=5,
+            )
+
+            output_guardrail_decision = self._run_step(
+                guardrail_step,
+                lambda: self.output_guardrail_service.validate_answer(
+                    answer=llm_response["answer"],
+                    citations=citations,
+                    retrieved_chunks=retrieval_result.chunks,
+                ),
+            )
+
+            final_answer = llm_response["answer"]
+            final_citations = citations
+
+            if not output_guardrail_decision.allowed:
+                final_answer = output_guardrail_decision.safe_response or (
+                    "I could not produce a safe, grounded answer."
+                )
+                final_citations = []
+
             self.chat_service.add_message(
                 session_id=session.id,
                 role="assistant",
-                content=llm_response["answer"],
-                citations=citations,
+                content=final_answer,
+                citations=final_citations,
                 metadata={
                     "workflow_run_id": str(workflow_run.id),
                     "retrieved_chunk_count": retrieval_result.total,
                     "model_provider": llm_response.get("provider"),
                     "model_name": llm_response.get("model"),
+                    "guardrail_action": output_guardrail_decision.action,
+                    "guardrail_reason": output_guardrail_decision.reason,
+                    "guardrail_checks": [
+                        check.model_dump()
+                        for check in output_guardrail_decision.checks
+                    ],
                 },
             )
 
@@ -187,13 +260,23 @@ class RAGService:
             self.audit_service.log_event(
                 organization_id=organization_id,
                 user_id=user_id,
-                action="document.question_answered",
+                action=(
+                    "guardrail.output_blocked"
+                    if not output_guardrail_decision.allowed
+                    else "document.question_answered"
+                ),
                 resource_type="document",
                 resource_id=str(document_id),
                 metadata={
                     "workflow_run_id": str(workflow_run.id),
                     "session_id": str(session.id),
                     "retrieved_chunk_count": retrieval_result.total,
+                    "guardrail_action": output_guardrail_decision.action,
+                    "guardrail_reason": output_guardrail_decision.reason,
+                    "guardrail_checks": [
+                        check.model_dump()
+                        for check in output_guardrail_decision.checks
+                    ],
                 },
             )
 
@@ -204,11 +287,17 @@ class RAGService:
                 "session_id": session.id,
                 "document_id": document_id,
                 "question": question,
-                "answer": llm_response["answer"],
-                "citations": citations,
+                "answer": final_answer,
+                "citations": final_citations,
                 "retrieved_chunk_count": retrieval_result.total,
                 "model_provider": llm_response.get("provider", "unknown"),
                 "model_name": llm_response.get("model", "unknown"),
+                "guardrail_action": output_guardrail_decision.action,
+                "guardrail_reason": output_guardrail_decision.reason,
+                "guardrail_checks": [
+                    check.model_dump()
+                    for check in output_guardrail_decision.checks
+                ],
             }
 
         except Exception as error:
