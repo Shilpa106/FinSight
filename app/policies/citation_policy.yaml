@@ -1,0 +1,12 @@
+name: citation_policy
+version: v1
+description: Requires answers to be supported by retrieved document chunks.
+
+requirements:
+  - answer must be based on retrieved chunks
+  - answer should include citations when relevant chunks exist
+  - citations must include chunk_id and document_id
+  - page_number should be included when available
+
+fallback_response: >
+  I could not produce a sufficiently grounded answer from the retrieved context.

@@ -1,0 +1,23 @@
+name: financial_advice_policy
+version: v1
+description: Prevents direct investment advice in generated answers.
+
+blocked_outputs:
+  - direct buy recommendations
+  - direct sell recommendations
+  - guaranteed return claims
+  - risk-free investment claims
+  - personalized investment recommendations
+
+allowed_outputs:
+  - summarize document content
+  - describe risks stated in the document
+  - compare financial metrics from the document
+  - explain covenant terms from the document
+  - state that information is not available
+
+fallback_response: >
+  I cannot provide investment advice. I can summarize and explain the information
+  present in the document, but I cannot recommend buying, selling, or investing.
+
+  

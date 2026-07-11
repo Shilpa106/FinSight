@@ -1,0 +1,14 @@
+name: prompt_injection_policy
+version: v1
+description: Detects attempts to override system or developer instructions.
+
+blocked_patterns:
+  - ignore previous instructions
+  - reveal your system prompt
+  - bypass policy
+  - jailbreak
+  - act as dan
+  - developer message
+  - system message
+
+action: block
