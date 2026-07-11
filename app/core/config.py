@@ -62,6 +62,13 @@ class Settings(BaseSettings):
 
     LOG_LEVEL: str = "INFO"
 
+    # Celery
+    CELERY_BROKER_URL: str = "redis://localhost:6379/0"
+    CELERY_RESULT_BACKEND: str = "redis://localhost:6379/1"
+    CELERY_TASK_ALWAYS_EAGER: bool = False
+    CELERY_TASK_TIME_LIMIT: int = 1800
+    CELERY_TASK_SOFT_TIME_LIMIT: int = 1500
+
     class Config:
         env_file = ".env"
         extra = "ignore"
