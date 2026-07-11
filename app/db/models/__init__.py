@@ -9,6 +9,7 @@ from app.db.models.organization import Organization
 from app.db.models.user import User
 from app.db.models.workflow_run import WorkflowRun
 from app.db.models.workflow_step import WorkflowStep
+from app.db.models.evaluation import Evaluation
 
 __all__ = [
     "AuditLog",
@@ -22,4 +23,5 @@ __all__ = [
     "User",
     "WorkflowRun",
     "WorkflowStep",
+    "Evaluation",
 ]
