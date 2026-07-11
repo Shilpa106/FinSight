@@ -13,6 +13,8 @@ from app.schemas.evaluation import (
     EvaluationRunResponse,
 )
 from app.services.evaluations.evaluation_service import EvaluationService
+from app.schemas.tasks import AsyncTaskResponse
+from app.tasks.evaluation_tasks import run_evaluation_task
 
 router = APIRouter()
 
@@ -108,3 +110,20 @@ def list_document_evaluations(
     )
 
     return evaluations
+
+@router.post("/run/async", response_model=AsyncTaskResponse)
+def run_evaluation_async(
+    request: EvaluationRunRequest,
+) -> AsyncTaskResponse:
+    task = run_evaluation_task.delay(
+        run_name=request.run_name,
+        dataset_path=request.dataset_path,
+    )
+
+    return AsyncTaskResponse(
+        task_id=task.id,
+        workflow_run_id=None,
+        document_id=None,
+        status="queued",
+        message="Evaluation task queued.",
+    )

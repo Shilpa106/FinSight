@@ -12,8 +12,12 @@ from app.schemas.document_processing import (
 from app.services.documents.document_processing_service import (
     DocumentProcessingService,
 )
+from app.schemas.tasks import AsyncTaskResponse
+from app.tasks.document_tasks import extract_document_text_task
+from app.tasks.pipeline_tasks import document_full_pipeline_task
 
 router = APIRouter()
+
 
 
 @router.post("/{document_id}/process-text", response_model=DocumentProcessingResponse)
@@ -95,3 +99,45 @@ def get_document_text(
 
     except ValueError as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
+    
+
+@router.post("/{document_id}/process-text/async", response_model=AsyncTaskResponse)
+def process_document_text_async(
+    document_id: UUID,
+    organization_id: UUID,
+    user_id: UUID | None = None,
+) -> AsyncTaskResponse:
+    task = extract_document_text_task.delay(
+        document_id=str(document_id),
+        organization_id=str(organization_id),
+        user_id=str(user_id) if user_id else None,
+    )
+
+    return AsyncTaskResponse(
+        task_id=task.id,
+        workflow_run_id=None,
+        document_id=document_id,
+        status="queued",
+        message="Document text extraction task queued.",
+    )
+
+
+@router.post("/{document_id}/pipeline/async", response_model=AsyncTaskResponse)
+def process_document_pipeline_async(
+    document_id: UUID,
+    organization_id: UUID,
+    user_id: UUID | None = None,
+) -> AsyncTaskResponse:
+    task = document_full_pipeline_task.delay(
+        document_id=str(document_id),
+        organization_id=str(organization_id),
+        user_id=str(user_id) if user_id else None,
+    )
+
+    return AsyncTaskResponse(
+        task_id=task.id,
+        workflow_run_id=None,
+        document_id=document_id,
+        status="queued",
+        message="Document processing pipeline task queued.",
+    )

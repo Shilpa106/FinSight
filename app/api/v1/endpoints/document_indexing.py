@@ -11,6 +11,9 @@ from app.schemas.indexing import (
     DocumentIndexingResponse,
 )
 from app.services.documents.document_indexing_service import DocumentIndexingService
+from app.schemas.tasks import AsyncTaskResponse
+from app.tasks.indexing_tasks import index_document_task
+
 
 router = APIRouter()
 
@@ -95,3 +98,24 @@ def list_document_chunks(
 
     except ValueError as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
+    
+
+@router.post("/{document_id}/index/async", response_model=AsyncTaskResponse)
+def index_document_async(
+    document_id: UUID,
+    organization_id: UUID,
+    user_id: UUID | None = None,
+) -> AsyncTaskResponse:
+    task = index_document_task.delay(
+        document_id=str(document_id),
+        organization_id=str(organization_id),
+        user_id=str(user_id) if user_id else None,
+    )
+
+    return AsyncTaskResponse(
+        task_id=task.id,
+        workflow_run_id=None,
+        document_id=document_id,
+        status="queued",
+        message="Document indexing task queued.",
+    )
