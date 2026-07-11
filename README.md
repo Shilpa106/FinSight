@@ -340,3 +340,29 @@ Add to completed progress:
 - Low-confidence answer routing
 - Review queue
 - Reviewer decisions
+
+
+---
+
+# Step 19: README Update
+
+Add to completed progress:
+
+```md
+### Completed
+
+- Human review database model
+- Review queue
+- Review routing from guardrails
+- Approve / reject / edit-approve decisions
+- Reviewer metadata
+- Review audit logging
+- Human review APIs
+
+### Next
+
+- Async processing with Celery
+- Background document processing
+- Background indexing
+- Retry handling
+- Scheduled evaluation runs
